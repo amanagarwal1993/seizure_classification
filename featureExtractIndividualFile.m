@@ -55,11 +55,9 @@ function [E,L_line,Var,Activity, Complexity, Mobility, BetaPower, Kurt] = featur
     Complexity = zeros(ceil(sample/fs), channels); %Variance
     Mobility = zeros(ceil(sample/fs), channels); %Variance
 
-    HFOPower = zeros(ceil(sample/fs), channels);
-    BetaPower = zeros(ceil(sample/fs), channels);
-    HighLowPowerRatio = zeros(ceil(sample/fs), channels);
+    BetaPower = zeros(ceil(sample/fs), channels);%Beta Power
     
-    Kurt = zeros(ceil(sample/fs), channels);
+    Kurt = zeros(ceil(sample/fs), channels);%Kurtosis
     
     j = 1; %counter variable for implementing new values into signal matrices
 
@@ -78,7 +76,9 @@ function [E,L_line,Var,Activity, Complexity, Mobility, BetaPower, Kurt] = featur
         avg(j, :) = (sum(data(start:stop,:),1))/len;
           
         xV = data(start:stop,:);
-        xV(find(isnan(xV))) = [];
+        xV(find(isnan(xV))) = []; %get rid of nan values
+        
+        %calculate Hjorth Parameters
         dxV = diff(xV);
         ddxV = diff(dxV);
         mx2 = mean(xV.^2);
@@ -90,8 +90,10 @@ function [E,L_line,Var,Activity, Complexity, Mobility, BetaPower, Kurt] = featur
         Complexity(j, :) = sqrt(mddx2 / mdx2 - mob);
         Mobility(j, :) = sqrt(mob);
         
+        %calculate beta power
         BetaPower(j,:) = bandpower(xV, fs, [12,30]);
-          
+        
+        %calculate kurtosis
         Kurt(j,:) = kurtosis(xV);
         
         start_ind(j) = start;
